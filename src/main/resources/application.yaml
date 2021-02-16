@@ -6,8 +6,13 @@ quarkus:
     username: postgres
     password: postgres
     jdbc:
-      url: jdbc:tracing:postgresql://postgres:5432/postgres
+      url: jdbc:tracing:postgresql://localhost:5432/postgres
       driver: io.opentracing.contrib.jdbc.TracingDriver
+    metrics:
+      enabled: true
+  smallrye-metrics:
+    jaxrs:
+      enabled: true
 
   swagger-ui:
     always-include: true
@@ -22,20 +27,39 @@ quarkus:
     category:
       "io.quarkus.arc.processor":
         level: DEBUG
+      "io.quarkus.smallrye.jwt":
+        level: DEBUG
 
   jaeger:
     endpoint: http://jaeger:14268/api/traces
     service-name: example
     sampler-type: const
     sampler-param: 1
+  container-image:
+    build: true
 
 mp:
+  jwt:
+    verify:
+      publickey:
+        location: http://localhost:8084/auth/realms/public/protocol/openid-connect/certs
+      issuer: http://localhost:8084/auth/realms/public
   openapi:
     scan:
       disable: true
   opentracing:
     server:
       operation-name-provider: http-path
+
+injected:
+    value: "Injected value"
+value: "lookup value"
+
+com:
+  example:
+    demo:
+      client:
+        Service/mp-rest/url=http://localhost:8180/data/client/service:
 
 org:
   eclipse:
