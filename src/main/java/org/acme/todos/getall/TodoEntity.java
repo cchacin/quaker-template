@@ -1,52 +1,35 @@
-package myservice;
+package org.acme.todos.getall;
 
-import java.time.LocalDateTime;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "todos")
-public class DaoEntity {
+public class TodoEntity extends PanacheEntity {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+    String title;
 
-    @Column(name = "title")
-    private String title;
+    String status;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
 
-    @Column(name = "created_on",
-            columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private LocalDateTime createdOn;
-
-    @Column(name = "done_at",
-            columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private LocalDateTime doneAt;
-
-    public DaoEntity() {
-        super();
-    }
+    @Column(name = "done_at")
+    LocalDateTime doneAt;
 
     public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        return this.id;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -54,7 +37,7 @@ public class DaoEntity {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(final String status) {
         this.status = status;
     }
 
@@ -62,7 +45,7 @@ public class DaoEntity {
         return createdOn;
     }
 
-    public void setCreatedOn(LocalDateTime createdOn) {
+    public void setCreatedOn(final LocalDateTime createdOn) {
         this.createdOn = createdOn;
     }
 
@@ -70,13 +53,14 @@ public class DaoEntity {
         return doneAt;
     }
 
-    public void setDoneAt(LocalDateTime updatedAt) {
-        this.doneAt = updatedAt;
+    public void setDoneAt(final LocalDateTime doneAt) {
+        this.doneAt = doneAt;
     }
 
-    public static DaoEntity.Builder builder() {
+    public static TodoEntity.Builder builder() {
         return Builder.aTodoItemEntity();
     }
+
     public static final class Builder {
         private Long id;
         private String title;
@@ -120,14 +104,13 @@ public class DaoEntity {
             return aTodoItemEntity().id(id).title(title).status(status).createdOn(createdOn).doneAt(doneAt);
         }
 
-        public DaoEntity build() {
-            DaoEntity daoEntity = new DaoEntity();
-            daoEntity.setId(id);
-            daoEntity.setTitle(title);
-            daoEntity.setStatus(status);
-            daoEntity.setCreatedOn(createdOn);
-            daoEntity.setDoneAt(doneAt);
-            return daoEntity;
+        public TodoEntity build() {
+            TodoEntity todoEntity = new TodoEntity();
+            todoEntity.setTitle(title);
+            todoEntity.setStatus(status);
+            todoEntity.setCreatedOn(createdOn);
+            todoEntity.setDoneAt(doneAt);
+            return todoEntity;
         }
     }
 }
