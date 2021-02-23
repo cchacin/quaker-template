@@ -5,7 +5,10 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +28,7 @@ public class Endpoint {
     }
 
     @GET
-    public Response listTodos(
-            @BeanParam final ListTodosParams params)
+    public Response listTodos()
             throws WebApplicationException {
         return Response.ok(getAllTodos.get()).build();
     }
@@ -77,61 +79,6 @@ public class Endpoint {
         public LocalDateTime getDoneAt() {
             return doneAt;
         }
-
-        public static final class Builder {
-            private Long id;
-            private String task;
-            private String status;
-            private LocalDateTime createdOn;
-            private LocalDateTime doneAt;
-
-            private Builder() {
-            }
-
-            public static Builder aTodoItemEntity() {
-                return new Builder();
-            }
-
-            public Builder id(Long id) {
-                this.id = id;
-                return this;
-            }
-
-            public Builder task(String task) {
-                this.task = task;
-                return this;
-            }
-
-            public Builder status(String status) {
-                this.status = status;
-                return this;
-            }
-
-            public Builder createdOn(LocalDateTime createdOn) {
-                this.createdOn = createdOn;
-                return this;
-            }
-
-            public Builder doneAt(LocalDateTime doneAt) {
-                this.doneAt = doneAt;
-                return this;
-            }
-
-            public Builder but() {
-                return aTodoItemEntity().id(id).task(task).status(status).createdOn(createdOn).doneAt(doneAt);
-            }
-
-            public Todo build() {
-                return new Todo(
-                        id,
-                        task,
-                        status,
-                        createdOn,
-                        doneAt
-                );
-            }
-        }
-
     }
 
     public enum TodoStatus {
@@ -163,32 +110,5 @@ public class Endpoint {
                     .findFirst()
                     .orElse(null);
         }
-    }
-
-    public static class ListTodosParams {
-        @javax.ws.rs.core.Context
-        public javax.ws.rs.core.HttpHeaders coreHttpHeaders;
-
-        @javax.ws.rs.core.Context
-        public javax.ws.rs.core.UriInfo coreUriInfo;
-
-        @javax.ws.rs.QueryParam("status")
-        public TodoStatus status;
-
-        public ListTodosParams coreHttpHeaders(final javax.ws.rs.core.HttpHeaders coreHttpHeaders) {
-            this.coreHttpHeaders = coreHttpHeaders;
-            return this;
-        }
-
-        public ListTodosParams coreUriInfo(final javax.ws.rs.core.UriInfo coreUriInfo) {
-            this.coreUriInfo = coreUriInfo;
-            return this;
-        }
-
-        public ListTodosParams status(final TodoStatus status) {
-            this.status = status;
-            return this;
-        }
-
     }
 }
