@@ -1,3 +1,10 @@
+"%dev":
+   quarkus:
+     datasource:
+       jdbc:
+         url: jdbc:tracing:postgresql://localhost:5432/postgres
+     jaeger:
+       endpoint: http://localhost:14268/api/traces
 quarkus:
   flyway:
     migrate-at-start: true
@@ -6,8 +13,9 @@ quarkus:
     username: postgres
     password: postgres
     jdbc:
-      url: jdbc:tracing:postgresql://localhost:5432/postgres
+      url: jdbc:tracing:postgresql://postgres:5432/postgres
       driver: io.opentracing.contrib.jdbc.TracingDriver
+      enable-metrics: true
     metrics:
       enabled: true
   smallrye-metrics:
@@ -27,16 +35,15 @@ quarkus:
     category:
       "io.quarkus.arc.processor":
         level: DEBUG
-      "io.quarkus.smallrye.jwt":
-        level: DEBUG
 
   jaeger:
     endpoint: http://jaeger:14268/api/traces
-    service-name: example
+    service-name: com.acme.todo
     sampler-type: const
     sampler-param: 1
   container-image:
     build: true
+    group: org.acme
 
 mp:
   jwt:
@@ -50,10 +57,6 @@ mp:
   opentracing:
     server:
       operation-name-provider: http-path
-
-injected:
-    value: "Injected value"
-value: "lookup value"
 
 com:
   example:
