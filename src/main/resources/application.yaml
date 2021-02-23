@@ -15,6 +15,7 @@ quarkus:
     jdbc:
       url: jdbc:tracing:postgresql://postgres:5432/postgres
       driver: io.opentracing.contrib.jdbc.TracingDriver
+      enable-metrics: true
     metrics:
       enabled: true
   smallrye-metrics:
