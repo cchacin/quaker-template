@@ -34,16 +34,15 @@ quarkus:
     category:
       "io.quarkus.arc.processor":
         level: DEBUG
-      "io.quarkus.smallrye.jwt":
-        level: DEBUG
 
   jaeger:
     endpoint: http://jaeger:14268/api/traces
-    service-name: example
+    service-name: com.acme.todo
     sampler-type: const
     sampler-param: 1
   container-image:
     build: true
+    group: org.acme
 
 mp:
   jwt:
@@ -57,10 +56,6 @@ mp:
   opentracing:
     server:
       operation-name-provider: http-path
-
-injected:
-    value: "Injected value"
-value: "lookup value"
 
 com:
   example:
