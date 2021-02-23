@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "todos")
-public class TodoEntity extends PanacheEntity {
+class TodoEntity extends PanacheEntity {
 
     String title;
 

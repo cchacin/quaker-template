@@ -1,5 +1,6 @@
 package org.acme.todos.getall;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -35,7 +36,9 @@ public class Endpoint {
         private final Long id;
         private final String task;
         private final String status;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private final LocalDateTime created;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private final LocalDateTime doneAt;
 
         public Todo(

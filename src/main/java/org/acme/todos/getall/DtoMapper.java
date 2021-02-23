@@ -5,7 +5,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "cdi")
-public interface DtoMapper {
+interface DtoMapper {
 
     Service.Todo mapFromDao(TodoEntity entity);
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Service {
+class Service {
 
     private final Function<Long, Todo> getTodo;
     private final Supplier<List<Todo>> getTodos;
@@ -25,7 +25,7 @@ public class Service {
         return getTodos.get();
     }
 
-    public static final class Todo {
+    static final class Todo {
         private final Long id;
         private final String title;
         private final String status;
