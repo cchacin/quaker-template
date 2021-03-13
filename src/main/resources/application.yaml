@@ -18,9 +18,6 @@ quarkus:
       enable-metrics: true
     metrics:
       enabled: true
-  smallrye-metrics:
-    jaxrs:
-      enabled: true
 
   swagger-ui:
     always-include: true
@@ -46,11 +43,6 @@ quarkus:
     group: org.acme
 
 mp:
-  jwt:
-    verify:
-      publickey:
-        location: http://localhost:8084/auth/realms/public/protocol/openid-connect/certs
-      issuer: http://localhost:8084/auth/realms/public
   openapi:
     scan:
       disable: true
@@ -62,7 +54,7 @@ com:
   example:
     demo:
       client:
-        Service/mp-rest/url=http://localhost:8180/data/client/service:
+        Service/mp-rest/url=http://service:8180/data/client/service:
 
 org:
   eclipse:

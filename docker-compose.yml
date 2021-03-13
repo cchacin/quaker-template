@@ -1,0 +1,212 @@
+version: "3.8"
+services:
+
+  microgen-dockerapp:
+    image: cchacin/microgen-dockerapp:0.1.6
+    volumes:
+      - dist_prometheus:/mp/prometheus
+      - dist_grafana_provisioning:/mp/grafana/provisioning
+      - dist_grafana_dashboards:/mp/grafana/dashboards
+      - dist_postgres:/mp/postgres
+      - dist_keycloack:/mp/keycloack
+
+  portainer:
+    image: portainer/portainer:1.24.1-alpine
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/portainer_password:/tmp/portainer_password
+    command: -H unix:///var/run/docker.sock --no-auth
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.portainer.rule=Host(`portainer.localhost`)
+      - traefik.http.routers.portainer.service=portainer
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.docker.network=inbound
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.21.0
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.jaegerui.rule=Host(`jaegerui.localhost`)
+      - traefik.http.routers.jaegerui.service=jaegerui
+      - traefik.http.services.jaegerui.loadbalancer.server.port=16686
+
+      - traefik.http.routers.jaeger.rule=Host(`jaeger.localhost`)
+      - traefik.http.routers.jaeger.service=jaeger
+      - traefik.http.services.jaeger.loadbalancer.server.port=14268
+
+      - traefik.docker.network=inbound
+
+  prometheus:
+    image: prom/prometheus:v2.24.1
+    volumes:
+      - dist_prometheus:/etc/prometheus/
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    restart: always
+    depends_on:
+      - microgen-dockerapp
+      - application
+    links:
+      - application
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)
+      - traefik.http.routers.prometheus.service=prometheus
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.docker.network=inbound
+
+  grafana:
+    image: grafana/grafana:7.4.1
+    user: "104"
+    restart: always
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - dist_grafana_provisioning:/etc/grafana/provisioning/
+      - dist_grafana_dashboards:/var/lib/grafana/dashboards/
+    depends_on:
+      - microgen-dockerapp
+    links:
+      - prometheus
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.grafana.rule=Host(`grafana.localhost`)
+      - traefik.http.routers.grafana.service=grafana
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.docker.network=inbound
+
+  postgres:
+    image: library/postgres:13-alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+    networks:
+      - inbound
+    labels:
+      - traefik.tcp.routers.postgres.rule=HostSNI(`postgres.localhost`)
+      - traefik.tcp.routers.postgres.service=postgres
+      - traefik.tcp.services.postgres.loadbalancer.server.port=5432
+      - traefik.docker.network=inbound
+
+  pgexporter:
+    image: prometheuscommunity/postgres-exporter:v0.9.0
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable
+    ports:
+      - 9187:9187
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.pgexporter.rule=Host(`pgexporter.localhost`)
+      - traefik.http.routers.pgexporter.service=pgexporter
+      - traefik.http.services.pgexporter.loadbalancer.server.port=9187
+      - traefik.docker.network=inbound
+
+  pgadmin:
+    image: dpage/pgadmin4:5
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /tmp/pgadmin4/servers.json
+    volumes:
+      - dist_postgres:/tmp/pgadmin4
+    restart: always
+    depends_on:
+      - microgen-dockerapp
+    links:
+      - postgres
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.pgadmin.rule=Host(`pgadmin.localhost`)
+      - traefik.http.routers.pgadmin.service=pgadmin
+      - traefik.http.services.pgadmin.loadbalancer.server.port=80
+      - traefik.docker.network=inbound
+
+  httpbin:
+    image: kennethreitz/httpbin
+    restart: always
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.httpbin.rule=Host(`httpbin.localhost`)
+      - traefik.http.routers.httpbin.service=httpbin
+      - traefik.http.services.httpbin.loadbalancer.server.port=80
+      - traefik.docker.network=inbound
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:12.0.4
+    environment:
+      DB_VENDOR: H2
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /var/log/quarkus-realm.json
+    volumes:
+      - dist_keycloack:/var/log
+    depends_on:
+      - microgen-dockerapp
+    restart: always
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.keycloak.rule=Host(`keycloak.localhost`)
+      - traefik.http.routers.keycloak.service=keycloak
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+      - traefik.docker.network=inbound
+
+  traefik:
+    image: library/traefik:v2.4
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --metrics.prometheus=true
+      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      - --providers.docker=true
+      - --tracing.jaeger=true
+      - --tracing.jaeger.collector.endpoint=http://jaeger:14268/api/traces?format=jaeger.thrift
+    networks:
+      - inbound
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 80:80
+      - 8080:8080
+    labels:
+      - traefik.http.routers.traefik.rule=Host(`traefik.localhost`)
+      - traefik.http.routers.traefik.service=traefik
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+      - traefik.docker.network=inbound
+
+  application:
+    image: org.acme/todo:1.0-SNAPSHOT
+    depends_on:
+      - postgres
+    restart: always
+    links:
+      - jaeger
+      - postgres
+      - keycloak
+      - httpbin
+    networks:
+      - inbound
+    labels:
+      - traefik.http.routers.application.rule=Host(`application.localhost`)
+      - traefik.http.routers.application.service=application
+      - traefik.http.services.application.loadbalancer.server.port=8080
+      - traefik.docker.network=inbound
+
+networks:
+  inbound:
+    name: inbound
+volumes:
+  dist_prometheus:
+  dist_grafana_dashboards:
+  dist_grafana_provisioning:
+  dist_postgres:
+  dist_keycloack:
