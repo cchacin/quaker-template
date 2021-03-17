@@ -152,6 +152,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <output>${project.build.directory}/generated-sources</output>
                             <generatorName>jaxrs-spec</generatorName>
                             <library>quarkus</library>
                             <generateApiDocumentation>false</generateApiDocumentation>
@@ -160,6 +161,7 @@
                             <apiPackage>org.acme.api</apiPackage>
                             <invokerPackage>org.acme.api</invokerPackage>
                             <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
                                 <dateLibrary>java8</dateLibrary>
                                 <useTags>true</useTags>
                                 <generateBuilders>false</generateBuilders>
