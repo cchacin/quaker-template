@@ -2,6 +2,7 @@ package org.acme.todos.getall;
 
 import org.acme.api.ListTodosApi;
 import org.acme.model.Todo;
+import org.acme.model.TodoStatus;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,7 +25,7 @@ public class Endpoint implements ListTodosApi {
 
     @Override
     public Response listTodos(
-            org.acme.model.TodoStatus status) {
+            final TodoStatus status) {
         return Response.ok(getAllTodos.get()).build();
     }
 }
