@@ -2,24 +2,23 @@ package org.acme.todos.getall;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "todos")
 class TodoEntity extends PanacheEntity {
 
-    String title;
+    private String title;
 
-    String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Column(name = "created_on")
-    LocalDateTime createdOn;
+    private LocalDateTime createdOn;
 
     @Column(name = "done_at")
-    LocalDateTime doneAt;
+    private LocalDateTime doneAt;
 
     public Long getId() {
         return this.id;
@@ -33,11 +32,11 @@ class TodoEntity extends PanacheEntity {
         this.title = title;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(final String status) {
+    public void setStatus(final Status status) {
         this.status = status;
     }
 
@@ -55,5 +54,11 @@ class TodoEntity extends PanacheEntity {
 
     public void setDoneAt(final LocalDateTime doneAt) {
         this.doneAt = doneAt;
+    }
+
+    public enum Status {
+        DONE,
+        WAITING,
+        WORKING
     }
 }

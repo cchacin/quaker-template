@@ -14,10 +14,18 @@ public class GreetingResourceIT {
     @Test
     public void testHelloEndpoint() {
         given()
-          .when().get("/hello-resteasy")
-          .then()
-             .statusCode(200)
-             .body(is("Hello RESTEasy Reactive"));
+                .when().get("/hello-resteasy")
+                .then()
+                .statusCode(200)
+                .body(is("Hello RESTEasy Reactive"));
     }
 
+    @Test
+    public void testTodosEndpoint() {
+        given()
+                .when().get("/todos")
+                .then()
+                .statusCode(200)
+                .body("$.size()", is(4));
+    }
 }
