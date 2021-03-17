@@ -4,6 +4,11 @@ This is an opinionated [Quarkus][1] template including a set of extensions, depe
 
 ![header](/docs/images/header.png)
 
+## How to start
+
+
+![howtostart](/docs/images/howtostart.gif)
+
 
 ## What is in there?
 
