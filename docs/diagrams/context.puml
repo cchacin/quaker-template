@@ -1,0 +1,53 @@
+@startuml
+!include ../C4-PlantUML/C4_Component.puml
+
+!define DEVICONS ../plantuml-icon-font-sprites/devicons
+!include DEVICONS/chrome.puml
+!include DEVICONS/docker.puml
+!include DEVICONS/java.puml
+!include DEVICONS/postgresql.puml
+!include DEVICONS/terminal.puml
+
+LAYOUT_LEFT_RIGHT()
+
+Container_Boundary(localhost, "127.0.0.1", "local") {
+  Person(developer, Developer, "")
+  Component_Ext(browser, "Browser", "HTTP", "", chrome)
+  Component_Ext(terminal, "CLI", "HTTP", "", terminal)
+}
+
+Container_Boundary(docker, "*.localhost", "docker-compose.yml") {
+  Container_Boundary(ui-boundary, "Exposed", "") {
+    Component(pgadmin, "Database Admin UI", "PgAdmin", "Optional Description", docker)
+    Component(keycloak, "Identity System", "Keycloack", "Optional Description", docker)
+    Component(jaeger, "Tracing Collector", "jaeger", "OpenTracing", docker)
+    Component(jaegerui, "Tracing UI", "jaeger", "OpenTracing", docker)
+    Component(prometheus, "Metrics Collector", "Prometheus", "Prometheus Format", docker)
+    Component(grafana, "Metrics Visualizer", "Grafana", "Optional Description", docker)
+
+    Container(app, "APP", "Quarkus", "Restful API", java)
+    ComponentDb(postgres, "Database", "PostgreSQL", "Holds the todos information", postgresql)
+  }
+  Component(traefik, "Gateway", "Traefik2", "Proxy", docker)
+}
+Rel(developer, browser, "HTTP")
+Rel(developer, terminal, "HTTP")
+Rel(browser, traefik, "HTTP", "traefik.localhost")
+Rel(terminal, traefik, "HTTP", "traefik.localhost")
+
+Rel(traefik, app, "HTTP", "application.localhost")
+Rel(traefik, pgadmin, "HTTP", "pgadmin.localhost")
+Rel(traefik, keycloak, "HTTP", "keycloak.localhost")
+Rel(traefik, jaegerui, "HTTP", "jaeguerui.localhost")
+Rel(traefik, grafana, "HTTP", "grafana.localhost")
+
+Rel(grafana, prometheus, "HTTP", "Optional Technology")
+Rel(prometheus, app, "HTTP", "/metrics")
+Rel(jaegerui, jaeger, "TCP", "/api")
+Rel(pgadmin, postgres, "TCP", "")
+
+Rel(app, jaeger, "HTTP", "Microprofile OpenTracing")
+Rel(app, keycloak, "HTTP", "Microprofile JWT")
+Rel(app, postgres, "TCP", "Standard JDBC")
+
+@enduml
