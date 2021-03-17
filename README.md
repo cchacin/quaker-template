@@ -2,6 +2,9 @@
 
 This is an opinionated [Quarkus][1] template including a set of extensions, dependencies and example code to have ready to production application in minutes.
 
+![header](/docs/images/header.png)
+
+
 ## What is in there?
 
 - [JPA][2] entity extended with [Panache][3] to perform CRUD operations against a database.
